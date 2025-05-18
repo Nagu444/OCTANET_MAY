@@ -201,3 +201,23 @@
     </script>
 </body>
 </html>
+
+
+
+def suggest():
+    form = CropSuggestionForm()
+    crops = []
+    
+    if form.validate_on_submit():
+        soil_type = form.soil_type.data
+        soil_condition = form.soil_condition.data
+        
+        # Filter crops based on selection
+        crops = [
+            crop for crop in CROP_DATABASE 
+            if (soil_type in crop.get('best_soil', '') or 
+                soil_type in crop.get('suitable_soils', [])) and
+            soil_condition in crop.get('soil_conditions', [])
+        ]
+    
+    return render_template('suggest.html', form=form, crops=crops)
