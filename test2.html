@@ -17,205 +17,189 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: Arial, sans-serif;
         }
         
         body {
             background-color: #f5f7fa;
-        }
-        
-        .dashboard-container {
-            display: flex;
             min-height: 100vh;
         }
         
-        /* Sidebar Styles */
-        .dashboard-sidebar {
-            width: var(--sidebar-width);
-            background: var(--dark);
+        .container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: 100%;
+            background: linear-gradient(to bottom, #1f2a38, #3b4a5a);
             color: white;
             padding: 20px 0;
-            position: fixed;
-            height: 100vh;
+            order: 1;
         }
         
-        .profile-section {
+        .profile {
             text-align: center;
-            padding: 20px;
-            border-bottom: 1px solid #34495e;
+            margin-bottom: 30px;
+            padding: 0 20px;
         }
         
-        .profile-img {
-            width: 80px;
-            height: 80px;
+        .avatar {
+            width: 60px;
+            height: 60px;
+            background-color: var(--primary);
             border-radius: 50%;
-            object-fit: cover;
-            margin-bottom: 15px;
-            border: 3px solid var(--primary);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: white;
         }
         
-        .services-nav ul {
-            list-style: none;
-            margin-top: 20px;
+        .name {
+            font-size: 14px;
         }
         
-        .services-nav li {
-            margin: 5px 0;
-        }
-        
-        .service-link {
+        .name span {
             display: block;
-            padding: 12px 20px;
-            color: #ecf0f1;
+            font-size: 12px;
+            color: #ccc;
+            margin-top: 5px;
+        }
+        
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .sidebar li {
+            padding: 15px 20px;
+            transition: background-color 0.3s;
+        }
+        
+        .sidebar li:hover {
+            background-color: #2e3b4e;
+        }
+        
+        .sidebar a {
+            color: white;
             text-decoration: none;
-            transition: all 0.3s;
-            border-left: 4px solid transparent;
+            display: block;
+            position: relative;
         }
         
-        .service-link:hover {
-            background: rgba(255,255,255,0.1);
-            border-left-color: var(--primary);
+        .sidebar a::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -5px;
+            width: 0;
+            height: 2px;
+            background-color: var(--primary);
+            transition: width 0.3s;
         }
         
-        .service-link.active {
-            background: rgba(46, 204, 113, 0.2);
-            border-left-color: var(--primary);
+        .sidebar a:hover::after {
+            width: 100%;
         }
         
-        .service-link i {
-            margin-right: 10px;
-            width: 20px;
-            text-align: center;
-        }
-        
-        /* Main Content Area */
-        .dashboard-content {
-            flex: 1;
-            margin-left: var(--sidebar-width);
-            padding: 25px;
-            min-height: 100vh;
-        }
-        
-        .content-header {
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .card {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        .content {
+            order: 2;
+            flex-grow: 1;
             padding: 20px;
-            margin-bottom: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
         
-        /* Loading indicator */
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid var(--primary);
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
+        iframe {
+            width: 100%;
+            height: 100%;
+            min-height: 500px;
+            border: none;
+            background-color: white;
         }
         
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        /* Responsive layout */
+        @media (min-width: 768px) {
+            .container {
+                flex-direction: row;
+            }
+            
+            .sidebar {
+                width: var(--sidebar-width);
+                height: 100vh;
+                position: sticky;
+                top: 0;
+                order: 0;
+            }
+            
+            .content {
+                flex-grow: 1;
+                padding: 30px;
+            }
+        }
+        
+        /* Active link styling */
+        .sidebar a:target {
+            color: var(--primary);
+            font-weight: bold;
+        }
+        
+        .sidebar a:target::after {
+            width: 100%;
+        }
+        
+        /* Content sections */
+        .content-section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .content-section:target {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
     </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-    <div class="dashboard-container">
-        <!-- Sidebar -->
-        <div class="dashboard-sidebar">
-            <div class="profile-section">
-                <img src="https://ui-avatars.com/api/?name=John+Doe&background=27ae60&color=fff" alt="Profile" class="profile-img">
-                <h3>John Doe</h3>
-                <p>Farm Manager</p>
+    <div class="container">
+        <div class="sidebar">
+            <div class="profile">
+                <div class="avatar">JD</div>
+                <div class="name">John Doe<span>Farm Manager</span></div>
             </div>
-            
-            <nav class="services-nav">
-                <ul>
-                    <li><a href="#" class="service-link active" data-page="forecast.html"><i class="fas fa-cloud-sun"></i> Weather Forecast</a></li>
-                    <li><a href="#" class="service-link" data-page="crop.html"><i class="fas fa-seedling"></i> Crop Planning</a></li>
-                    <li><a href="#" class="service-link" data-page="soil.html"><i class="fas fa-vial"></i> Soil Analysis</a></li>
-                    <li><a href="#" class="service-link" data-page="irrigation.html"><i class="fas fa-tint"></i> Irrigation</a></li>
-                    <li><a href="#" class="service-link" data-page="alerts.html"><i class="fas fa-bell"></i> Alerts</a></li>
-                </ul>
-            </nav>
+            <ul>
+                <li><a href="#weather">Weather Forecast</a></li>
+                <li><a href="#crop">Crop Planning</a></li>
+                <li><a href="#soil">Soil Analysis</a></li>
+                <li><a href="#irrigation">Irrigation</a></li>
+                <li><a href="#alerts">Alerts</a></li>
+            </ul>
         </div>
-
-        <!-- Main Content -->
-        <div class="dashboard-content">
-            <div id="content-container">
-                <!-- Content will be loaded here from HTML files -->
-                <div class="content-header">
-                    <h2>Welcome to AgroWeather Pro</h2>
-                </div>
-                <div class="card">
-                    <p>Select a service from the sidebar to begin.</p>
-                </div>
+        <div class="content">
+            <div id="weather" class="content-section">
+                <iframe src="weather.html" name="weatherFrame"></iframe>
+            </div>
+            <div id="crop" class="content-section">
+                <iframe src="crop.html" name="cropFrame"></iframe>
+            </div>
+            <div id="soil" class="content-section">
+                <iframe src="soil.html" name="soilFrame"></iframe>
+            </div>
+            <div id="irrigation" class="content-section">
+                <iframe src="irrigation.html" name="irrigationFrame"></iframe>
+            </div>
+            <div id="alerts" class="content-section">
+                <iframe src="alerts.html" name="alertsFrame"></iframe>
             </div>
         </div>
     </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const contentContainer = document.getElementById('content-container');
-            const serviceLinks = document.querySelectorAll('.service-link');
-            
-            // Load content from HTML file
-            function loadContent(page) {
-                contentContainer.innerHTML = `
-                    <div style="text-align: center; padding: 40px 0;">
-                        <div class="loader"></div>
-                        <p>Loading content...</p>
-                    </div>
-                `;
-                
-                fetch(page)
-                    .then(response => {
-                        if (!response.ok) throw new Error('Network response was not ok');
-                        return response.text();
-                    })
-                    .then(html => {
-                        contentContainer.innerHTML = html;
-                    })
-                    .catch(error => {
-                        console.error('Error loading content:', error);
-                        contentContainer.innerHTML = `
-                            <div class="content-header">
-                                <h2>Error Loading Content</h2>
-                            </div>
-                            <div class="card">
-                                <p>Could not load ${page}. Please make sure the file exists.</p>
-                            </div>
-                        `;
-                    });
-            }
-            
-            // Handle service navigation
-            serviceLinks.forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    // Update active link
-                    serviceLinks.forEach(l => l.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    // Load content from HTML file
-                    const page = this.getAttribute('data-page');
-                    loadContent(page);
-                });
-            });
-            
-            // Load first service by default
-            loadContent('forecast.html');
-        });
-    </script>
 </body>
 </html>
