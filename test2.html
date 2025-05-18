@@ -1,171 +1,92 @@
+@app.route('/suggest',methods=['POST','GET'])
+def suggest():
+    form=soil()
+    if form.validate_on_submit():
+        soil_type=form.soil_type.data
+        soil_condition=form.soil_condition.data
+        con=mysql.connect
+        cur=con.cursor()
+        cur.execute(f"select distinct crop_name from crops where soil_type='{soil_type}' and soil_condition='{soil_condition}' order by 1")
+        result=cur.fetchall()
+        return render_template('crops.html',crops=result)
+    return render_template('suggest.html',form=form)
+
+    //suggest.html//
+
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h2>Crop Suggestions Here!!!</h2>
+    <form method="post">
+        {{form.hidden_tag()}}
+        {{form.soil_type.label}}
+        {{form.soil_type()}}<br>
+        {{form.soil_condition.label}}
+        {{form.soil_condition()}}<br>
+        {% for crop in crops %}
+            {{crop}}
+        {% endfor %}
+        {{form.submit()}}
+        
+    </form>
+
+</body>
+</html>
+
+
+/* crops.html */
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgroWeather Pro - Dashboard</title>
+    <title>Crops</title>
     <style>
-        :root {
-            --primary: #2ecc71;
-            --secondary: #27ae60;
-            --dark: #2c3e50;
-            --light: #ecf0f1;
-            --sidebar-width: 250px;
+        body{
+            padding-left: 35px;
+            padding-top: 30px;
         }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
-        }
-        
-        body {
-            background-color: #f5f7fa;
-            min-height: 100vh;
+        .wrapper{
             display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
         }
-        
-        .sidebar {
-            width: var(--sidebar-width);
-            background: linear-gradient(to bottom, #1f2a38, #3b4a5a);
-            color: white;
-            padding: 20px 0;
-            position: fixed;
-            height: 100vh;
-            overflow-y: auto;
+        .container{
+            height: 300px;
+            width: 250px;
+            background-color:whitesmoke;
+            color: whitesmoke;
+            margin-bottom: 5px;
+            border: 1px solid black;
+            box-shadow: 2px;
+            border-radius: 5px;
         }
-        
-        .profile {
+        .top{
+            height: 250px;
+            width: 100%;
+            background-color:white;
+        }
+        .bot{
+            height: 40px;
+            background-color: green;
             text-align: center;
-            margin-bottom: 30px;
-            padding: 0 20px;
-        }
-        
-        .avatar {
-            width: 60px;
-            height: 60px;
-            background-color: var(--primary);
-            border-radius: 50%;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            margin-bottom: 10px;
-            color: white;
-        }
-        
-        .name {
-            font-size: 14px;
-        }
-        
-        .name span {
-            display: block;
-            font-size: 12px;
-            color: #ccc;
-            margin-top: 5px;
-        }
-        
-        .sidebar ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        
-        .sidebar li {
-            padding: 15px 20px;
-            transition: background-color 0.3s;
-        }
-        
-        .sidebar li:hover {
-            background-color: #2e3b4e;
-        }
-        
-        .sidebar a {
-            color: white;
-            text-decoration: none;
-            display: block;
-        }
-        
-        .content {
-            margin-left: var(--sidebar-width);
-            flex-grow: 1;
-            padding: 20px;
-            background-color: white;
-        }
-        
-        iframe {
-            width: 100%;
-            height: calc(100vh - 40px);
-            border: none;
-            background-color: white;
-        }
-        
-        /* Responsive layout */
-        @media (max-width: 768px) {
-            body {
-                flex-direction: column;
-            min-height: 100vh;
-            height: auto;
-            overflow-x: hidden;
-            position: relative;
-            padding-top: 60px;
-            padding-bottom: 60px;
-        }
-        
-        .sidebar {
-            width: 100%;
-            height: 60px;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 100;
-            padding: 10px 0;
-            overflow-x: auto;
-            white-space: nowrap;
-        }
-        
-        .profile {
-            display: none;
-        }
-        
-        .sidebar ul {
-            display: flex;
-        }
-        
-        .sidebar li {
-            padding: 0 15px;
-            display: inline-block;
-        }
-        
-        .content {
-            margin-left: 0;
-            margin-top: 60px;
-            padding: 15px;
-            min-height: calc(100vh - 120px);
-        }
-        
-        iframe {
-            height: calc(100vh - 120px);
+            padding-top: 10px;
         }
     </style>
 </head>
 <body>
-    <div class="sidebar">
-        <div class="profile">
-            <div class="avatar">JD</div>
-            <div class="name">John Doe<span>Farm Manager</span></div>
-        </div>
-        <ul>
-            <li><a href="weather.html" target="contentFrame">Weather Forecast</a></li>
-            <li><a href="crop.html" target="contentFrame">Crop Planning</a></li>
-            <li><a href="soil.html" target="contentFrame">Soil Analysis</a></li>
-            <li><a href="irrigation.html" target="contentFrame">Irrigation</a></li>
-            <li><a href="alerts.html" target="contentFrame">Alerts</a></li>
-        </ul>
+    <div class="wrapper">
+    {% for crop in crops%}
+    <div class="container">
+        <div class="top">hi</div>
+        <div class="bot"><strong style="font-size: large;">{{ crop['crop_name'] }}</strong></div>
     </div>
-    <div class="content">
-        <iframe name="contentFrame" src="weather.html"></iframe>
+    {% endfor %}
     </div>
 </body>
 </html>
