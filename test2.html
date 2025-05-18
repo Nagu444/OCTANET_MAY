@@ -13,7 +13,7 @@ def suggest():
 
     //suggest.html//
 
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -45,48 +45,201 @@ def suggest():
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crops</title>
+    <title>Crop Suggestion</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body{
-            padding-left: 35px;
-            padding-top: 30px;
+        :root {
+            --primary-green: #2e7d32;
+            --light-green: #e8f5e9;
         }
-        .wrapper{
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
+        body {
+            background-color: #f8f9fa;
+            padding: 20px;
         }
-        .container{
-            height: 300px;
-            width: 250px;
-            background-color:whitesmoke;
-            color: whitesmoke;
-            margin-bottom: 5px;
-            border: 1px solid black;
-            box-shadow: 2px;
-            border-radius: 5px;
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
         }
-        .top{
-            height: 250px;
-            width: 100%;
-            background-color:white;
+        .suggestion-form {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
-        .bot{
-            height: 40px;
-            background-color: green;
+        .form-title {
+            color: var(--primary-green);
+            margin-bottom: 25px;
             text-align: center;
-            padding-top: 10px;
+        }
+        .btn-submit {
+            background-color: var(--primary-green);
+            border: none;
+            width: 100%;
+            padding: 10px;
+            margin-top: 20px;
+        }
+        .btn-submit:hover {
+            background-color: #237341;
+        }
+        .results-section {
+            margin-top: 50px;
+            display: none; /* Hidden by default */
+        }
+        .results-title {
+            color: var(--primary-green);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .crops-wrapper {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            padding: 20px 0;
+        }
+        .crop-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            height: 100%;
+        }
+        .crop-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        }
+        .crop-image {
+            height: 200px;
+            width: 100%;
+            object-fit: cover;
+        }
+        .crop-body {
+            padding: 15px;
+        }
+        .crop-title {
+            color: var(--primary-green);
+            margin-bottom: 10px;
+        }
+        .crop-details {
+            color: #555;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+        .crop-footer {
+            background-color: var(--light-green);
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .badge {
+            background-color: var(--primary-green);
+        }
+        .no-crops {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+            background: white;
+            border-radius: 10px;
+        }
+        @media (max-width: 768px) {
+            .crops-wrapper {
+                grid-template-columns: 1fr;
+            }
+            .suggestion-form {
+                padding: 20px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="wrapper">
-    {% for crop in crops%}
-    <div class="container">
-        <div class="top">hi</div>
-        <div class="bot"><strong style="font-size: large;">{{ crop['crop_name'] }}</strong></div>
+    <div class="main-container">
+        <!-- Form Section -->
+        <div class="suggestion-form">
+            <h2 class="form-title"><i class="fas fa-seedling me-2"></i>Get Crop Suggestions</h2>
+            <form method="post" class="needs-validation" novalidate>
+                {{ form.hidden_tag() }}
+                
+                <div class="mb-3">
+                    {{ form.soil_type.label(class="form-label") }}
+                    {{ form.soil_type(class="form-select") }}
+                </div>
+                
+                <div class="mb-3">
+                    {{ form.soil_condition.label(class="form-label") }}
+                    {{ form.soil_condition(class="form-select") }}
+                </div>
+                
+                {{ form.submit(class="btn btn-primary btn-submit") }}
+            </form>
+        </div>
+
+        <!-- Results Section (shown after submission) -->
+        {% if crops %}
+        <div class="results-section" style="display: block;">
+            <h2 class="results-title"><i class="fas fa-list me-2"></i>Recommended Crops</h2>
+            
+            <div class="crops-wrapper">
+                {% for crop in crops %}
+                <div class="crop-card">
+                    <img src="{{ crop.get('image_url', 'https://via.placeholder.com/300x200?text=Crop+Image') }}" 
+                         class="crop-image" 
+                         alt="{{ crop['crop_name'] }}">
+                    <div class="crop-body">
+                        <h3 class="crop-title">{{ crop['crop_name'] }}</h3>
+                        <p class="crop-details">
+                            <i class="fas fa-info-circle"></i> {{ crop.get('description', 'Great choice for your soil') }}
+                        </p>
+                        <p class="crop-details">
+                            <i class="fas fa-calendar-alt"></i> Best Season: {{ crop.get('season', 'All Year') }}
+                        </p>
+                        <p class="crop-details">
+                            <i class="fas fa-tint"></i> Water: {{ crop.get('water', 'Moderate') }}
+                        </p>
+                    </div>
+                    <div class="crop-footer">
+                        <span class="badge rounded-pill">Yield: {{ crop.get('yield', 'High') }}</span>
+                        <span class="text-muted">Soil: {{ crop.get('best_soil', form.soil_type.data) }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% elif request.method == 'POST' %}
+        <div class="results-section" style="display: block;">
+            <div class="no-crops">
+                <i class="fas fa-leaf fa-3x mb-3" style="color: #ccc;"></i>
+                <h3>No crops found matching your criteria</h3>
+                <p>Try adjusting your soil parameters or consider soil improvement</p>
+                <a href="{{ url_for('suggest') }}" class="btn btn-outline-success mt-3">
+                    <i class="fas fa-redo me-2"></i>Try Again
+                </a>
+            </div>
+        </div>
+        {% endif %}
     </div>
-    {% endfor %}
-    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Simple form validation
+        (function() {
+            'use strict';
+            const forms = document.querySelectorAll('.needs-validation');
+            
+            Array.prototype.slice.call(forms)
+                .forEach(function(form) {
+                    form.addEventListener('submit', function(event) {
+                        if (!form.checkValidity()) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+        })();
+    </script>
 </body>
 </html>
