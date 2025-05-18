@@ -1,9 +1,47 @@
+@app.route('/suggest', methods=['POST', 'GET'])
+def suggest():
+    form = soil()
+    crops = []
+    
+    if form.validate_on_submit():
+        soil_type = form.soil_type.data
+        soil_condition = form.soil_condition.data
+        
+        # Secure database connection with parameterized queries
+        try:
+            con = mysql.connect()
+            cur = con.cursor()
+            cur.execute(
+                "SELECT DISTINCT crop_name, image_url, description, season FROM crops "
+                "WHERE soil_type=%s AND soil_condition=%s ORDER BY crop_name",
+                (soil_type, soil_condition)
+            )
+            crops = [{
+                'crop_name': row[0],
+                'image_url': row[1] or get_default_image(row[0]),
+                'description': row[2] or f"Excellent {row[0]} for {soil_type} soil",
+                'season': row[3] or 'All Year'
+            } for row in cur.fetchall()]
+        except Exception as e:
+            flash('Error fetching crops: ' + str(e), 'error')
+        finally:
+            cur.close()
+            con.close()
+    
+    return render_template('suggest.html', form=form, crops=crops)
+
+def get_default_image(crop_name):
+    # Returns a placeholder image based on crop name
+    return f"https://source.unsplash.com/300x200/?{crop_name},agriculture"
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crop Suggestion</title>
+    <title>Crop Suggestions</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -13,55 +51,20 @@
         }
         body {
             background-color: #f8f9fa;
-            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        .main-container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        .suggestion-form {
-            max-width: 600px;
-            margin: 40px auto;
-            padding: 30px;
+        .form-container {
             background: white;
             border-radius: 10px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        .form-title {
-            color: var(--primary-green);
-            margin-bottom: 25px;
-            text-align: center;
-        }
-        .btn-submit {
-            background-color: var(--primary-green);
-            border: none;
-            width: 100%;
-            padding: 10px;
-            margin-top: 20px;
-        }
-        .btn-submit:hover {
-            background-color: #237341;
-        }
-        .results-section {
-            margin-top: 50px;
-            display: none; /* Hidden by default */
-        }
-        .results-title {
-            color: var(--primary-green);
-            margin-bottom: 30px;
-            text-align: center;
-        }
-        .crops-wrapper {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 25px;
-            padding: 20px 0;
+            padding: 2rem;
+            margin-bottom: 2rem;
         }
         .crop-card {
-            background: white;
+            transition: all 0.3s ease;
+            border: none;
             border-radius: 10px;
             overflow: hidden;
-            transition: all 0.3s ease;
             box-shadow: 0 3px 10px rgba(0,0,0,0.1);
             height: 100%;
         }
@@ -69,155 +72,96 @@
             transform: translateY(-5px);
             box-shadow: 0 10px 20px rgba(0,0,0,0.15);
         }
-        .crop-image {
-            height: 200px;
-            width: 100%;
+        .crop-img {
+            height: 180px;
             object-fit: cover;
+            transition: transform 0.5s ease;
         }
-        .crop-body {
-            padding: 15px;
+        .crop-card:hover .crop-img {
+            transform: scale(1.05);
         }
-        .crop-title {
-            color: var(--primary-green);
-            margin-bottom: 10px;
-        }
-        .crop-details {
-            color: #555;
-            font-size: 0.9rem;
-            margin-bottom: 5px;
-        }
-        .crop-footer {
-            background-color: var(--light-green);
-            padding: 10px 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .badge {
+        .card-footer {
             background-color: var(--primary-green);
+            color: white;
         }
-        .no-crops {
+        .no-results {
             text-align: center;
-            padding: 50px;
-            color: #666;
+            padding: 3rem;
             background: white;
             border-radius: 10px;
         }
         @media (max-width: 768px) {
-            .crops-wrapper {
-                grid-template-columns: 1fr;
-            }
-            .suggestion-form {
-                padding: 20px;
+            .crop-col {
+                margin-bottom: 1.5rem;
             }
         }
     </style>
 </head>
 <body>
-    <div class="main-container">
-        <!-- Form Section -->
-        <div class="suggestion-form">
-            <h2 class="form-title"><i class="fas fa-seedling me-2"></i>Get Crop Suggestions</h2>
-            <form method="post" class="needs-validation" novalidate>
+    <div class="container py-5">
+        <div class="form-container">
+            <h2 class="text-center mb-4" style="color: var(--primary-green);">
+                <i class="fas fa-seedling me-2"></i>Crop Suggestion Tool
+            </h2>
+            <form method="POST">
                 {{ form.hidden_tag() }}
-                
                 <div class="mb-3">
                     {{ form.soil_type.label(class="form-label") }}
                     {{ form.soil_type(class="form-select") }}
                 </div>
-                
                 <div class="mb-3">
                     {{ form.soil_condition.label(class="form-label") }}
                     {{ form.soil_condition(class="form-select") }}
                 </div>
-                
-                {{ form.submit(class="btn btn-primary btn-submit") }}
+                <button type="submit" class="btn btn-success w-100 py-2">
+                    <i class="fas fa-search me-2"></i>Find Crops
+                </button>
             </form>
         </div>
 
-        <!-- Results Section (shown after submission) -->
         {% if crops %}
-        <div class="results-section" style="display: block;">
-            <h2 class="results-title"><i class="fas fa-list me-2"></i>Recommended Crops</h2>
-            
-            <div class="crops-wrapper">
-                {% for crop in crops %}
-                <div class="crop-card">
-                    <img src="{{ crop.get('image_url', 'https://via.placeholder.com/300x200?text=Crop+Image') }}" 
-                         class="crop-image" 
-                         alt="{{ crop['crop_name'] }}">
-                    <div class="crop-body">
-                        <h3 class="crop-title">{{ crop['crop_name'] }}</h3>
-                        <p class="crop-details">
-                            <i class="fas fa-info-circle"></i> {{ crop.get('description', 'Great choice for your soil') }}
-                        </p>
-                        <p class="crop-details">
-                            <i class="fas fa-calendar-alt"></i> Best Season: {{ crop.get('season', 'All Year') }}
-                        </p>
-                        <p class="crop-details">
-                            <i class="fas fa-tint"></i> Water: {{ crop.get('water', 'Moderate') }}
-                        </p>
+        <h3 class="text-center mb-4" style="color: var(--primary-green);">
+            <i class="fas fa-list me-2"></i>Recommended Crops
+        </h3>
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            {% for crop in crops %}
+            <div class="col crop-col">
+                <div class="card crop-card h-100">
+                    <img src="{{ crop.image_url }}" class="card-img-top crop-img" alt="{{ crop.crop_name }}">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ crop.crop_name }}</h5>
+                        <p class="card-text text-muted">{{ crop.description }}</p>
+                        <p class="card-text"><small class="text-muted">
+                            <i class="fas fa-calendar-alt me-1"></i> {{ crop.season }}
+                        </small></p>
                     </div>
-                    <div class="crop-footer">
-                        <span class="badge rounded-pill">Yield: {{ crop.get('yield', 'High') }}</span>
-                        <span class="text-muted">Soil: {{ crop.get('best_soil', form.soil_type.data) }}</span>
+                    <div class="card-footer text-center">
+                        <small>Ideal for {{ form.soil_type.data }} soil</small>
                     </div>
                 </div>
-                {% endfor %}
             </div>
+            {% endfor %}
         </div>
         {% elif request.method == 'POST' %}
-        <div class="results-section" style="display: block;">
-            <div class="no-crops">
-                <i class="fas fa-leaf fa-3x mb-3" style="color: #ccc;"></i>
-                <h3>No crops found matching your criteria</h3>
-                <p>Try adjusting your soil parameters or consider soil improvement</p>
-                <a href="{{ url_for('suggest') }}" class="btn btn-outline-success mt-3">
-                    <i class="fas fa-redo me-2"></i>Try Again
-                </a>
-            </div>
+        <div class="no-results">
+            <i class="fas fa-leaf fa-4x mb-3" style="color: #ccc;"></i>
+            <h4>No crops found matching your criteria</h4>
+            <p class="text-muted">Try different soil parameters or contact an agricultural expert</p>
         </div>
         {% endif %}
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Simple form validation
-        (function() {
-            'use strict';
-            const forms = document.querySelectorAll('.needs-validation');
-            
-            Array.prototype.slice.call(forms)
-                .forEach(function(form) {
-                    form.addEventListener('submit', function(event) {
-                        if (!form.checkValidity()) {
-                            event.preventDefault();
-                            event.stopPropagation();
-                        }
-                        form.classList.add('was-validated');
-                    }, false);
-                });
-        })();
+        // Auto-scroll to results after form submission
+        {% if crops or (request.method == 'POST' and not crops) %}
+        document.addEventListener('DOMContentLoaded', function() {
+            const resultsSection = document.querySelector('.row') || document.querySelector('.no-results');
+            if (resultsSection) {
+                resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+        {% endif %}
     </script>
 </body>
 </html>
-
-
-
-def suggest():
-    form = CropSuggestionForm()
-    crops = []
-    
-    if form.validate_on_submit():
-        soil_type = form.soil_type.data
-        soil_condition = form.soil_condition.data
-        
-        # Filter crops based on selection
-        crops = [
-            crop for crop in CROP_DATABASE 
-            if (soil_type in crop.get('best_soil', '') or 
-                soil_type in crop.get('suitable_soils', [])) and
-            soil_condition in crop.get('soil_conditions', [])
-        ]
-    
-    return render_template('suggest.html', form=form, crops=crops)
