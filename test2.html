@@ -1,167 +1,178 @@
-@app.route('/suggest', methods=['POST', 'GET'])
-def suggest():
-    form = soil()
-    crops = []
-    
-    if form.validate_on_submit():
-        soil_type = form.soil_type.data
-        soil_condition = form.soil_condition.data
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h2>Crop Suggestions Here!!!</h2>
+    <form method="post">
+        {{form.hidden_tag()}}
+        {{form.soil_type.label}}
+        {{form.soil_type()}}<br>
+        {{form.soil_condition.label}}
+        {{form.soil_condition()}}<br>
+        {% for crop in crops %}
+            {{crop}}
+        {% endfor %}
+        {{form.submit()}}
         
-        # Secure database connection with parameterized queries
-        try:
-            con = mysql.connect()
-            cur = con.cursor()
-            cur.execute(
-                "SELECT DISTINCT crop_name, image_url, description, season FROM crops "
-                "WHERE soil_type=%s AND soil_condition=%s ORDER BY crop_name",
-                (soil_type, soil_condition)
-            )
-            crops = [{
-                'crop_name': row[0],
-                'image_url': row[1] or get_default_image(row[0]),
-                'description': row[2] or f"Excellent {row[0]} for {soil_type} soil",
-                'season': row[3] or 'All Year'
-            } for row in cur.fetchall()]
-        except Exception as e:
-            flash('Error fetching crops: ' + str(e), 'error')
-        finally:
-            cur.close()
-            con.close()
-    
-    return render_template('suggest.html', form=form, crops=crops)
+    </form>
 
-def get_default_image(crop_name):
-    # Returns a placeholder image based on crop name
-    return f"https://source.unsplash.com/300x200/?{crop_name},agriculture"
-
-
+</body>
+</html>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crop Suggestions</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Crops</title>
     <style>
-        :root {
-            --primary-green: #2e7d32;
-            --light-green: #e8f5e9;
+        body{
+            padding-left: 35px;
+            padding-top: 30px;
         }
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        .wrapper{
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
         }
-        .form-container {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            padding: 2rem;
-            margin-bottom: 2rem;
+        .container{
+            height: 300px;
+            width: 250px;
+            background-color:whitesmoke;
+            color: whitesmoke;
+            margin-bottom: 5px;
+            border: 1px solid whitesmoke;
+            
+            box-shadow: 2px;
+            border-radius: 5px;
         }
-        .crop-card {
-            transition: all 0.3s ease;
-            border: none;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-            height: 100%;
+        .top{
+            height: 250px;
+            width: 100%;
+            background-color:white;
         }
-        .crop-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
-        }
-        .crop-img {
-            height: 180px;
-            object-fit: cover;
-            transition: transform 0.5s ease;
-        }
-        .crop-card:hover .crop-img {
-            transform: scale(1.05);
-        }
-        .card-footer {
-            background-color: var(--primary-green);
-            color: white;
-        }
-        .no-results {
+        .bot{
+            height: 40px;
+            background-color: green;
             text-align: center;
-            padding: 3rem;
-            background: white;
-            border-radius: 10px;
-        }
-        @media (max-width: 768px) {
-            .crop-col {
-                margin-bottom: 1.5rem;
-            }
+            padding-top: 10px;
         }
     </style>
 </head>
 <body>
-    <div class="container py-5">
-        <div class="form-container">
-            <h2 class="text-center mb-4" style="color: var(--primary-green);">
-                <i class="fas fa-seedling me-2"></i>Crop Suggestion Tool
-            </h2>
-            <form method="POST">
-                {{ form.hidden_tag() }}
-                <div class="mb-3">
-                    {{ form.soil_type.label(class="form-label") }}
-                    {{ form.soil_type(class="form-select") }}
-                </div>
-                <div class="mb-3">
-                    {{ form.soil_condition.label(class="form-label") }}
-                    {{ form.soil_condition(class="form-select") }}
-                </div>
-                <button type="submit" class="btn btn-success w-100 py-2">
-                    <i class="fas fa-search me-2"></i>Find Crops
-                </button>
-            </form>
-        </div>
-
-        {% if crops %}
-        <h3 class="text-center mb-4" style="color: var(--primary-green);">
-            <i class="fas fa-list me-2"></i>Recommended Crops
-        </h3>
-        <div class="row row-cols-1 row-cols-md-3 g-4">
-            {% for crop in crops %}
-            <div class="col crop-col">
-                <div class="card crop-card h-100">
-                    <img src="{{ crop.image_url }}" class="card-img-top crop-img" alt="{{ crop.crop_name }}">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ crop.crop_name }}</h5>
-                        <p class="card-text text-muted">{{ crop.description }}</p>
-                        <p class="card-text"><small class="text-muted">
-                            <i class="fas fa-calendar-alt me-1"></i> {{ crop.season }}
-                        </small></p>
-                    </div>
-                    <div class="card-footer text-center">
-                        <small>Ideal for {{ form.soil_type.data }} soil</small>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-        {% elif request.method == 'POST' %}
-        <div class="no-results">
-            <i class="fas fa-leaf fa-4x mb-3" style="color: #ccc;"></i>
-            <h4>No crops found matching your criteria</h4>
-            <p class="text-muted">Try different soil parameters or contact an agricultural expert</p>
-        </div>
-        {% endif %}
+    <div class="wrapper">
+    {% for crop in crops %}
+    {% if crop['crop_name']=="Tomato" %}
+    <div class="container">
+        <div class="top"><img src="{{ url_for('static', filename='images/tomato.jpg')}}" style="width: 250px; height: 250px;"> </div>
+        <div class="bot"><strong style="font-size: large;">{{ crop['crop_name'] }}</strong></div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Auto-scroll to results after form submission
-        {% if crops or (request.method == 'POST' and not crops) %}
-        document.addEventListener('DOMContentLoaded', function() {
-            const resultsSection = document.querySelector('.row') || document.querySelector('.no-results');
-            if (resultsSection) {
-                resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        });
-        {% endif %}
-    </script>
+    {% elif crop['crop_name']=="Barley" %}
+    <div class="container">
+        <div class="top"><img src="{{ url_for('static', filename='images/barley.jpg')}}" style="width: 250px; height: 250px;"> </div>
+        <div class="bot"><strong style="font-size: large;">{{ crop['crop_name'] }}</strong></div>
+    </div>
+    {% elif crop['crop_name']=="Cashew" %}
+    <div class="container">
+        <div class="top"><img src="{{ url_for('static', filename='images/cashew.jpg')}}" style="width: 250px; height: 250px;"> </div>
+        <div class="bot"><strong style="font-size: large;">{{ crop['crop_name'] }}</strong></div>
+    </div>
+    {% elif crop['crop_name']=="Chickpea" %}
+    <div class="container">
+        <div class="top"><img src="{{ url_for('static', filename='images/chickpea.jpg')}}" style="width: 250px; height: 250px;"> </div>
+        <div class="bot"><strong style="font-size: large;">{{ crop['crop_name'] }}</strong></div>
+    </div>
+    {% elif crop['crop_name']=="Cotton" %}
+    <div class="container">
+        <div class="top"><img src="{{ url_for('static', filename='images/cotton.jpg')}}" style="width: 250px; height: 250px;"> </div>
+        <div class="bot"><strong style="font-size: large;">{{ crop['crop_name'] }}</strong></div>
+    </div>
+    {% elif crop['crop_name']=="Groundnut" %}
+    <div class="container">
+        <div class="top"><img src="{{ url_for('static', filename='images/groundnut.jpg')}}" style="width: 250px; height: 250px;"> </div>
+        <div class="bot"><strong style="font-size: large;">{{ crop['crop_name'] }}</strong></div>
+    </div>
+    {% elif crop['crop_name']=="Jute" %}
+    <div class="container">
+        <div class="top"><img src="{{ url_for('static', filename='images/jute.jpg')}}" style="width: 250px; height: 250px;"> </div>
+        <div class="bot"><strong style="font-size: large;">{{ crop['crop_name'] }}</strong></div>
+    </div>
+    {% elif crop['crop_name']=="Maize" %}
+    <div class="container">
+        <div class="top"><img src="{{ url_for('static', filename='images/maize.jpg')}}" style="width: 250px; height: 250px;"> </div>
+        <div class="bot"><strong style="font-size: large;">{{ crop['crop_name'] }}</strong></div>
+    </div>
+    {% elif crop['crop_name']=="Millet" %}
+    <div class="container">
+        <div class="top"><img src="{{ url_for('static', filename='images/millet.jpg')}}" style="width: 250px; height: 250px;"> </div>
+        <div class="bot"><strong style="font-size: large;">{{ crop['crop_name'] }}</strong></div>
+    </div>
+    {% elif crop['crop_name']=="Mustard" %}
+    <div class="container">
+        <div class="top"><img src="{{ url_for('static', filename='images/mustard.jpg')}}" style="width: 250px; height: 250px;"> </div>
+        <div class="bot"><strong style="font-size: large;">{{ crop['crop_name'] }}</strong></div>
+    </div>
+    {% elif crop['crop_name']=="Onion" %}
+    <div class="container">
+        <div class="top"><img src="{{ url_for('static', filename='images/onions.jpg')}}" style="width: 250px; height: 250px;"> </div>
+        <div class="bot"><strong style="font-size: large;">{{ crop['crop_name'] }}</strong></div>
+    </div>
+    {% elif crop['crop_name']=="Paddy" %}
+    <div class="container">
+        <div class="top"><img src="{{ url_for('static', filename='images/paddy.jpg')}}" style="width: 250px; height: 250px;"> </div>
+        <div class="bot"><strong style="font-size: large;">{{ crop['crop_name'] }}</strong></div>
+    </div>
+    {% elif crop['crop_name']=="Peas" %}
+    <div class="container">
+        <div class="top"><img src="{{ url_for('static', filename='images/peas.jpg')}}" style="width: 250px; height: 250px;"> </div>
+        <div class="bot"><strong style="font-size: large;">{{ crop['crop_name'] }}</strong></div>
+    </div>
+    {% elif crop['crop_name']=="Potato" %}
+    <div class="container">
+        <div class="top"><img src="{{ url_for('static', filename='images/potato.jpg')}}" style="width: 250px; height: 250px;"> </div>
+        <div class="bot"><strong style="font-size: large;">{{ crop['crop_name'] }}</strong></div>
+    </div>
+    {% elif crop['crop_name']=="Rice" %}
+    <div class="container">
+        <div class="top"><img src="{{ url_for('static', filename='images/rice.jpg')}}" style="width: 250px; height: 250px;"> </div>
+        <div class="bot"><strong style="font-size: large;">{{ crop['crop_name'] }}</strong></div>
+    </div>
+    {% elif crop['crop_name']=="Sorghum" %}
+    <div class="container">
+        <div class="top"><img src="{{ url_for('static', filename='images/sorghum.jpg')}}" style="width: 250px; height: 250px;"> </div>
+        <div class="bot"><strong style="font-size: large;">{{ crop['crop_name'] }}</strong></div>
+    </div>
+    {% elif crop['crop_name']=="Soybean" %}
+    <div class="container">
+        <div class="top"><img src="{{ url_for('static', filename='images/soybeans.jpg')}}" style="width: 250px; height: 250px;"> </div>
+        <div class="bot"><strong style="font-size: large;">{{ crop['crop_name'] }}</strong></div>
+    </div>
+    {% elif crop['crop_name']=="Sugarcane" %}
+    <div class="container">
+        <div class="top"><img src="{{ url_for('static', filename='images/sugarcane.jpg')}}" style="width: 250px; height: 250px;"> </div>
+        <div class="bot"><strong style="font-size: large;">{{ crop['crop_name'] }}</strong></div>
+    </div>
+    {% elif crop['crop_name']=="Tea" %}
+    <div class="container">
+        <div class="top"><img src="{{ url_for('static', filename='images/tea.jpg')}}" style="width: 250px; height: 250px;"> </div>
+        <div class="bot"><strong style="font-size: large;">{{ crop['crop_name'] }}</strong></div>
+    </div>
+    {% elif crop['crop_name']=="Wheat" %}
+    <div class="container">
+        <div class="top"><img src="{{ url_for('static', filename='images/wheat.jpg')}}" style="width: 250px; height: 250px;"> </div>
+        <div class="bot"><strong style="font-size: large;">{{ crop['crop_name'] }}</strong></div>
+    </div>
+    {% else %}
+    <div class="container">
+        <div class="top"><img src="#" style="width: 250px; height: 250px;"> </div>
+        <div class="bot"><strong style="font-size: large;">{{ crop['crop_name'] }}</strong></div>
+    </div>
+    {% endif %}
+    {% endfor %}
+    </div>
 </body>
 </html>
