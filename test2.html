@@ -1,178 +1,52 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    <h2>Crop Suggestions Here!!!</h2>
-    <form method="post">
-        {{form.hidden_tag()}}
-        {{form.soil_type.label}}
-        {{form.soil_type()}}<br>
-        {{form.soil_condition.label}}
-        {{form.soil_condition()}}<br>
-        {% for crop in crops %}
-            {{crop}}
-        {% endfor %}
-        {{form.submit()}}
-        
-    </form>
-
-</body>
-</html>
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crops</title>
+    <title>Flask Select with Iframe</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body{
-            padding-left: 35px;
-            padding-top: 30px;
+        body {
+            background: linear-gradient(to right, #74ebd5, #acb6e5);
+            min-height: 100vh;
+            padding: 40px;
         }
-        .wrapper{
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
+        .form-container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 30px;
+            background: #fff;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
         }
-        .container{
-            height: 300px;
-            width: 250px;
-            background-color:whitesmoke;
-            color: whitesmoke;
-            margin-bottom: 5px;
-            border: 1px solid whitesmoke;
-            
-            box-shadow: 2px;
-            border-radius: 5px;
-        }
-        .top{
-            height: 250px;
+        iframe {
             width: 100%;
-            background-color:white;
-        }
-        .bot{
-            height: 40px;
-            background-color: green;
-            text-align: center;
-            padding-top: 10px;
+            height: 200px;
+            border: none;
+            margin-top: 20px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            box-shadow: inset 0 0 5px #ccc;
         }
     </style>
 </head>
 <body>
-    <div class="wrapper">
-    {% for crop in crops %}
-    {% if crop['crop_name']=="Tomato" %}
-    <div class="container">
-        <div class="top"><img src="{{ url_for('static', filename='images/tomato.jpg')}}" style="width: 250px; height: 250px;"> </div>
-        <div class="bot"><strong style="font-size: large;">{{ crop['crop_name'] }}</strong></div>
-    </div>
-    {% elif crop['crop_name']=="Barley" %}
-    <div class="container">
-        <div class="top"><img src="{{ url_for('static', filename='images/barley.jpg')}}" style="width: 250px; height: 250px;"> </div>
-        <div class="bot"><strong style="font-size: large;">{{ crop['crop_name'] }}</strong></div>
-    </div>
-    {% elif crop['crop_name']=="Cashew" %}
-    <div class="container">
-        <div class="top"><img src="{{ url_for('static', filename='images/cashew.jpg')}}" style="width: 250px; height: 250px;"> </div>
-        <div class="bot"><strong style="font-size: large;">{{ crop['crop_name'] }}</strong></div>
-    </div>
-    {% elif crop['crop_name']=="Chickpea" %}
-    <div class="container">
-        <div class="top"><img src="{{ url_for('static', filename='images/chickpea.jpg')}}" style="width: 250px; height: 250px;"> </div>
-        <div class="bot"><strong style="font-size: large;">{{ crop['crop_name'] }}</strong></div>
-    </div>
-    {% elif crop['crop_name']=="Cotton" %}
-    <div class="container">
-        <div class="top"><img src="{{ url_for('static', filename='images/cotton.jpg')}}" style="width: 250px; height: 250px;"> </div>
-        <div class="bot"><strong style="font-size: large;">{{ crop['crop_name'] }}</strong></div>
-    </div>
-    {% elif crop['crop_name']=="Groundnut" %}
-    <div class="container">
-        <div class="top"><img src="{{ url_for('static', filename='images/groundnut.jpg')}}" style="width: 250px; height: 250px;"> </div>
-        <div class="bot"><strong style="font-size: large;">{{ crop['crop_name'] }}</strong></div>
-    </div>
-    {% elif crop['crop_name']=="Jute" %}
-    <div class="container">
-        <div class="top"><img src="{{ url_for('static', filename='images/jute.jpg')}}" style="width: 250px; height: 250px;"> </div>
-        <div class="bot"><strong style="font-size: large;">{{ crop['crop_name'] }}</strong></div>
-    </div>
-    {% elif crop['crop_name']=="Maize" %}
-    <div class="container">
-        <div class="top"><img src="{{ url_for('static', filename='images/maize.jpg')}}" style="width: 250px; height: 250px;"> </div>
-        <div class="bot"><strong style="font-size: large;">{{ crop['crop_name'] }}</strong></div>
-    </div>
-    {% elif crop['crop_name']=="Millet" %}
-    <div class="container">
-        <div class="top"><img src="{{ url_for('static', filename='images/millet.jpg')}}" style="width: 250px; height: 250px;"> </div>
-        <div class="bot"><strong style="font-size: large;">{{ crop['crop_name'] }}</strong></div>
-    </div>
-    {% elif crop['crop_name']=="Mustard" %}
-    <div class="container">
-        <div class="top"><img src="{{ url_for('static', filename='images/mustard.jpg')}}" style="width: 250px; height: 250px;"> </div>
-        <div class="bot"><strong style="font-size: large;">{{ crop['crop_name'] }}</strong></div>
-    </div>
-    {% elif crop['crop_name']=="Onion" %}
-    <div class="container">
-        <div class="top"><img src="{{ url_for('static', filename='images/onions.jpg')}}" style="width: 250px; height: 250px;"> </div>
-        <div class="bot"><strong style="font-size: large;">{{ crop['crop_name'] }}</strong></div>
-    </div>
-    {% elif crop['crop_name']=="Paddy" %}
-    <div class="container">
-        <div class="top"><img src="{{ url_for('static', filename='images/paddy.jpg')}}" style="width: 250px; height: 250px;"> </div>
-        <div class="bot"><strong style="font-size: large;">{{ crop['crop_name'] }}</strong></div>
-    </div>
-    {% elif crop['crop_name']=="Peas" %}
-    <div class="container">
-        <div class="top"><img src="{{ url_for('static', filename='images/peas.jpg')}}" style="width: 250px; height: 250px;"> </div>
-        <div class="bot"><strong style="font-size: large;">{{ crop['crop_name'] }}</strong></div>
-    </div>
-    {% elif crop['crop_name']=="Potato" %}
-    <div class="container">
-        <div class="top"><img src="{{ url_for('static', filename='images/potato.jpg')}}" style="width: 250px; height: 250px;"> </div>
-        <div class="bot"><strong style="font-size: large;">{{ crop['crop_name'] }}</strong></div>
-    </div>
-    {% elif crop['crop_name']=="Rice" %}
-    <div class="container">
-        <div class="top"><img src="{{ url_for('static', filename='images/rice.jpg')}}" style="width: 250px; height: 250px;"> </div>
-        <div class="bot"><strong style="font-size: large;">{{ crop['crop_name'] }}</strong></div>
-    </div>
-    {% elif crop['crop_name']=="Sorghum" %}
-    <div class="container">
-        <div class="top"><img src="{{ url_for('static', filename='images/sorghum.jpg')}}" style="width: 250px; height: 250px;"> </div>
-        <div class="bot"><strong style="font-size: large;">{{ crop['crop_name'] }}</strong></div>
-    </div>
-    {% elif crop['crop_name']=="Soybean" %}
-    <div class="container">
-        <div class="top"><img src="{{ url_for('static', filename='images/soybeans.jpg')}}" style="width: 250px; height: 250px;"> </div>
-        <div class="bot"><strong style="font-size: large;">{{ crop['crop_name'] }}</strong></div>
-    </div>
-    {% elif crop['crop_name']=="Sugarcane" %}
-    <div class="container">
-        <div class="top"><img src="{{ url_for('static', filename='images/sugarcane.jpg')}}" style="width: 250px; height: 250px;"> </div>
-        <div class="bot"><strong style="font-size: large;">{{ crop['crop_name'] }}</strong></div>
-    </div>
-    {% elif crop['crop_name']=="Tea" %}
-    <div class="container">
-        <div class="top"><img src="{{ url_for('static', filename='images/tea.jpg')}}" style="width: 250px; height: 250px;"> </div>
-        <div class="bot"><strong style="font-size: large;">{{ crop['crop_name'] }}</strong></div>
-    </div>
-    {% elif crop['crop_name']=="Wheat" %}
-    <div class="container">
-        <div class="top"><img src="{{ url_for('static', filename='images/wheat.jpg')}}" style="width: 250px; height: 250px;"> </div>
-        <div class="bot"><strong style="font-size: large;">{{ crop['crop_name'] }}</strong></div>
-    </div>
-    {% else %}
-    <div class="container">
-        <div class="top"><img src="#" style="width: 250px; height: 250px;"> </div>
-        <div class="bot"><strong style="font-size: large;">{{ crop['crop_name'] }}</strong></div>
-    </div>
-    {% endif %}
-    {% endfor %}
+    <div class="form-container">
+        <form action="/result" method="POST" target="resultFrame">
+            {{ form.hidden_tag() }}
+            <div class="mb-3">
+                {{ form.option1.label(class="form-label") }}
+                {{ form.option1(class="form-select") }}
+            </div>
+            <div class="mb-3">
+                {{ form.option2.label(class="form-label") }}
+                {{ form.option2(class="form-select") }}
+            </div>
+            <div class="d-grid">
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
+        </form>
+
+        <iframe name="resultFrame" title="Result Output"></iframe>
     </div>
 </body>
 </html>
