@@ -151,3 +151,210 @@
     </div>
 </body>
 </html>
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Flask App with Enhanced Cards</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* ===== Your Existing Styles ===== */
+        /* Keep any existing styles you have here */
+        
+        /* ===== Enhanced Card Styles ===== */
+        .enhanced-card {
+            width: 280px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            background: white;
+            margin: 15px;
+            position: relative;
+        }
+
+        .enhanced-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .enhanced-card-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .enhanced-card:hover .enhanced-card-img {
+            transform: scale(1.05);
+        }
+
+        .enhanced-card-body {
+            padding: 20px;
+        }
+
+        .enhanced-card-title {
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .enhanced-card:hover .enhanced-card-title {
+            color: #0d6efd;
+            transform: translateY(-2px);
+        }
+
+        .enhanced-card-text {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* Floating Badge */
+        .enhanced-card-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(13, 110, 253, 0.9);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.8rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Glow Effect on Hover */
+        .enhanced-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #0d6efd, #6c5ce7);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .enhanced-card:hover::before {
+            opacity: 1;
+        }
+
+        /* Animation for card entrance */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .enhanced-card {
+            animation: fadeInUp 0.5s ease forwards;
+            opacity: 0;
+        }
+
+        /* Delay animations for each card */
+        .enhanced-card:nth-child(1) { animation-delay: 0.1s; }
+        .enhanced-card:nth-child(2) { animation-delay: 0.2s; }
+        .enhanced-card:nth-child(3) { animation-delay: 0.3s; }
+        .enhanced-card:nth-child(4) { animation-delay: 0.4s; }
+        .enhanced-card:nth-child(5) { animation-delay: 0.5s; }
+        .enhanced-card:nth-child(6) { animation-delay: 0.6s; }
+    </style>
+</head>
+<body>
+    <!-- Your Existing Flask Template Content -->
+    {% include 'navbar.html' %}  <!-- Keep your existing navbar -->
+
+    <div class="container mt-4">
+        <!-- Your existing content -->
+        <h1>Welcome to My Flask App</h1>
+        
+        <!-- Example Card Container - Keep your existing structure -->
+        <div class="row" id="cardContainer">
+            <!-- Flask will render cards here -->
+            {% for item in items %}
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <img src="{{ item.image_url }}" class="card-img-top" alt="{{ item.title }}">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ item.title }}</h5>
+                        <p class="card-text">{{ item.description }}</p>
+                        <a href="#" class="btn btn-primary">View Details</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Your existing footer -->
+    {% include 'footer.html' %}
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Enhanced Cards JavaScript -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Enhance all cards on the page
+        const cards = document.querySelectorAll('.card');
+        
+        cards.forEach((card, index) => {
+            // Add enhanced classes
+            card.classList.add('enhanced-card');
+            
+            // Add animation delay based on position
+            card.style.animationDelay = `${0.1 * (index + 1)}s`;
+            
+            // Find title element
+            const title = card.querySelector('.card-title') || card.querySelector('h3, h4, h5');
+            if (title) {
+                title.classList.add('enhanced-card-title');
+                
+                // Add cursor-following effect
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    title.style.transform = `translate(
+                        ${(x - rect.width / 2) / 25}px, 
+                        ${(y - rect.height / 2) / 25}px
+                    )`;
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    title.style.transform = 'translate(0, 0)';
+                });
+            }
+            
+            // Enhance image if exists
+            const img = card.querySelector('img');
+            if (img) img.classList.add('enhanced-card-img');
+            
+            // Enhance text if exists
+            const text = card.querySelector('.card-text') || card.querySelector('p');
+            if (text) text.classList.add('enhanced-card-text');
+            
+            // Add floating badge (optional)
+            const badge = document.createElement('span');
+            badge.classList.add('enhanced-card-badge');
+            badge.textContent = 'New';
+            card.appendChild(badge);
+        });
+    });
+    </script>
+</body>
+</html>
